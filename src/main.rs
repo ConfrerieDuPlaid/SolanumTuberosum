@@ -1,7 +1,6 @@
 use std::io;
-use std::io::Write;
+use std::io::{Read, Write};
 use std::net::TcpStream;
-use byteorder::{ByteOrder, BigEndian};
 
 fn main() -> io::Result<()> {
     println!("Hello, world!");
@@ -9,13 +8,20 @@ fn main() -> io::Result<()> {
     if let Ok(mut stream) = TcpStream::connect("127.0.0.1:7878") {
         println!("Connected to the server!");
 
-        let msg = "Hello".to_string();
-        let size = msg.len();
+        let msg = "\"Hello\"".to_string();
 
-        BigEndian::write_u32();
+        let bytes_msg = msg.as_bytes();
+        let size = (bytes_msg.len() as u32).to_be_bytes();
 
-        stream.write(b"5 Hello")?;
+        let result = stream.write(&[&size, bytes_msg].concat())?;
+        println!("Write result : {:?}, message: {}", result, msg);
 
+/*
+        let mut buf_size = [0; 4];
+        stream.try_clone()?.read(&mut buf_size).expect("Could not read stream message size");
+
+        println!("{}", String::from_utf8_lossy(&buf_size));
+*/
         stream.flush()?;
         Ok(())
     } else {
