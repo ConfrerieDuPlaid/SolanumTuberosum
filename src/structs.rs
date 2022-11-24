@@ -31,7 +31,18 @@ pub enum Challenge {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug)]
+pub struct MD5HashCashOutput {
+    pub seed: u64,
+    pub hashcode: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub enum ChallengeAnswer {
+    MD5HashCash(MD5HashCashOutput)
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub enum Message {
     Hello,
     Welcome {
@@ -42,5 +53,9 @@ pub enum Message {
     },
     SubscribeResult (SubscribeResult),
     PublicLeaderBoard (Vec<PublicPlayer>),
-    Challenge(Challenge)
+    Challenge(Challenge),
+    ChallengeResult{
+        answer: ChallengeAnswer,
+        next_target: String
+    }
 }

@@ -4,6 +4,8 @@ use std::net::TcpStream;
 use serde::{Deserialize, Serialize};
 use rand::Rng;
 use crate::structs::Message;
+use crate::structs::MD5HashCashOutput;
+use crate::structs::ChallengeAnswer;
 
 mod structs;
 
@@ -58,6 +60,14 @@ fn dispatch_messages(mut stream: &TcpStream, message: Message) {
         },
         Message::Challenge(challenge) => {
             println!("{:?}", challenge);
+            let result = Message::ChallengeResult {
+                answer: ChallengeAnswer::MD5HashCash(MD5HashCashOutput {
+                    seed: 0,
+                    hashcode: "".to_string()
+                }),
+                next_target: "".to_string()
+            };
+            send_message(&stream, result);
         }
         _ => {print!("Error")}
     }
