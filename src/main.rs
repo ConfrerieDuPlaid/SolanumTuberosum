@@ -55,6 +55,9 @@ fn dispatch_messages(mut stream: &TcpStream, message: Message) {
         }
         Message::PublicLeaderBoard( publicLeaderBoard ) => {
             println!("{:?}", publicLeaderBoard);
+        },
+        Message::Challenge(challenge) => {
+            println!("{:?}", challenge);
         }
         _ => {print!("Error")}
     }

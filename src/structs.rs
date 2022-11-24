@@ -23,6 +23,13 @@ pub struct PublicPlayer{
     total_used_time: f64
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum Challenge {
+    MD5HashCash {
+        complexity: u8,
+        message: String,
+    }
+}
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Message {
@@ -34,5 +41,6 @@ pub enum Message {
         name: String,
     },
     SubscribeResult (SubscribeResult),
-    PublicLeaderBoard (Vec<PublicPlayer>)
+    PublicLeaderBoard (Vec<PublicPlayer>),
+    Challenge(Challenge)
 }
