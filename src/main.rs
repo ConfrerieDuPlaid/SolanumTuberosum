@@ -5,7 +5,7 @@ use std::io::{Read, Write};
 use std::net::TcpStream;
 use serde::{Deserialize, Serialize};
 use rand::Rng;
-use crate::structs::{MD5HashCashInput, Message};
+use crate::structs::{Challenge, MD5HashCashInput, Message};
 use crate::structs::MD5HashCashOutput;
 use crate::structs::ChallengeAnswer;
 use MD5HashCash::MD5HashCashResolver;
@@ -61,6 +61,12 @@ fn dispatch_messages(mut stream: &TcpStream, message: Message) {
             println!("{:?}", publicLeaderBoard);
         },
         Message::Challenge(challenge) => {
+            match challenge {
+                Challenge::MD5HashCash(md5) => {
+                    println!("msg:{} complexity:{}", md5.message, md5.complexity);
+                }
+            }
+
             let md5hash_cash_resolver = MD5HashCashResolver{ input: MD5HashCashInput { complexity: 0, message: "".to_string() } };
             md5hash_cash_resolver.solve();
             let result = Message::ChallengeResult {
