@@ -61,22 +61,18 @@ fn dispatch_messages(mut stream: &TcpStream, message: Message) {
             println!("{:?}", publicLeaderBoard);
         },
         Message::Challenge(challenge) => {
-            match challenge {
+            let answer = match challenge {
                 Challenge::MD5HashCash(md5) => {
-                    println!("msg:{} complexity:{}", md5.message, md5.complexity);
+                    let solver = MD5HashCashResolver::new(md5);
+                    ChallengeAnswer::MD5HashCash(solver.solve())
                 }
-            }
+            };
 
-            let md5hash_cash_resolver = MD5HashCashResolver{ input: MD5HashCashInput { complexity: 0, message: "".to_string() } };
-            md5hash_cash_resolver.solve();
-            let result = Message::ChallengeResult {
-                answer: ChallengeAnswer::MD5HashCash(MD5HashCashOutput {
-                    seed: 0,
-                    hashcode: "".to_string()
-                }),
+            let message = Message::ChallengeResult {
+                answer,
                 next_target: "".to_string()
             };
-            send_message(&stream, result);
+            send_message(&stream, message);
         }
         _ => {print!("Error")}
     }
