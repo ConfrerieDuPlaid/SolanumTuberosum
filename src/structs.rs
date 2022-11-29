@@ -25,11 +25,15 @@ pub struct PublicPlayer{
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Challenge {
-    MD5HashCash {
-        complexity: u8,
-        message: String,
-    }
+    MD5HashCash (MD5HashCashInput)
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct MD5HashCashInput{
+    pub complexity: u8,
+    pub message: String,
+}
+
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct MD5HashCashOutput {
@@ -58,4 +62,19 @@ pub enum Message {
         answer: ChallengeAnswer,
         next_target: String
     }
+}
+
+pub trait ChallengeResolve{
+    /// Données en entrée du challenge
+    type Input;
+    /// Données en sortie du challenge
+    type Output;
+    /// Nom du challenge
+    fn name() -> String;
+    /// Create a challenge from the specific input
+    fn new(input: Self::Input) -> Self;
+    /// Résout le challenge
+    fn solve(&self) -> Self::Output;
+    /// Vérifie qu'une sortie est valide pour le challenge
+    fn verify(&self, answer: &Self::Output) -> bool;
 }

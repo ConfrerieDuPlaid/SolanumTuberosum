@@ -1,13 +1,15 @@
-extern crate core;
+mod structs;
+mod MD5HashCash;
+
 use std::io::{Read, Write};
 use std::net::TcpStream;
 use serde::{Deserialize, Serialize};
 use rand::Rng;
-use crate::structs::Message;
+use crate::structs::{MD5HashCashInput, Message};
 use crate::structs::MD5HashCashOutput;
 use crate::structs::ChallengeAnswer;
-
-mod structs;
+use MD5HashCash::MD5HashCashResolver;
+use structs::ChallengeResolve;
 
 fn main() {
     match TcpStream::connect("127.0.0.1:7878") {
@@ -59,7 +61,8 @@ fn dispatch_messages(mut stream: &TcpStream, message: Message) {
             println!("{:?}", publicLeaderBoard);
         },
         Message::Challenge(challenge) => {
-            println!("{:?}", challenge);
+            let md5hash_cash_resolver = MD5HashCashResolver{ input: MD5HashCashInput { complexity: 0, message: "".to_string() } };
+            md5hash_cash_resolver.solve();
             let result = Message::ChallengeResult {
                 answer: ChallengeAnswer::MD5HashCash(MD5HashCashOutput {
                     seed: 0,
