@@ -30,7 +30,7 @@ pub enum Challenge {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct MD5HashCashInput{
-    pub complexity: u8,
+    pub complexity: u32,
     pub message: String,
 }
 

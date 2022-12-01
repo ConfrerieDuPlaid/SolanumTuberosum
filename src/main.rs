@@ -45,7 +45,7 @@ fn receive_messages(mut stream: &TcpStream){
 }
 
 fn dispatch_messages(mut stream: &TcpStream, message: Message) {
-    println!("Dispatching: {:?}", message);
+    //println!("Dispatching: {:?}", message);
     match message {
         Message::Welcome { version } => {
             let mut rng = rand::thread_rng();
@@ -55,10 +55,10 @@ fn dispatch_messages(mut stream: &TcpStream, message: Message) {
             send_message(&stream, answer);
         }
         Message::SubscribeResult(subscribeResult) => {
-            println!("SubscribeResult")
+            //println!("SubscribeResult")
         }
         Message::PublicLeaderBoard( publicLeaderBoard ) => {
-            println!("{:?}", publicLeaderBoard);
+            //println!("{:?}", publicLeaderBoard);
         },
         Message::Challenge(challenge) => {
             let answer = match challenge {
