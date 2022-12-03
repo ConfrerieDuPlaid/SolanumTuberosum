@@ -45,6 +45,19 @@ pub struct MD5HashCashOutput {
 pub enum ChallengeAnswer {
     MD5HashCash(MD5HashCashOutput)
 }
+#[derive(Serialize, Deserialize, Debug)]
+pub enum ChallengeValue{
+    Unreachable,
+    Timeout,
+    BadResult { used_time: f64, next_target: String },
+    Ok { used_time: f64, next_target: String }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ReportedChallengeResult{
+    name: String,
+    value: ChallengeValue
+}
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum Message {
@@ -61,7 +74,11 @@ pub enum Message {
     ChallengeResult{
         answer: ChallengeAnswer,
         next_target: String
-    }
+    },
+    ChallengeTimeout(
+        String
+    ),
+    RoundSummary(String, Vec<ReportedChallengeResult>)
 }
 
 pub trait ChallengeResolve{

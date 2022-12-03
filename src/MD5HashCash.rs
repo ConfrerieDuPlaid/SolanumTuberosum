@@ -5,6 +5,7 @@ use crate::structs::ChallengeResolve;
 use crate::structs::MD5HashCashInput;
 use md5::{Md5, Digest};
 use hex::encode;
+use md5::digest::consts::U64;
 
 pub struct MD5HashCashResolver {
     pub input: MD5HashCashInput
@@ -26,27 +27,46 @@ impl ChallengeResolve for MD5HashCashResolver{
     }
 
     fn solve(&self) -> Self::Output {
-        let seed: &str = "000000000000034C";
-        let msg: String = seed.to_owned() + self.input.message.as_str();
+        let mut seedConuter = 0;
+        loop {
+            let mut seedConuterHexa = format!("{:x}", seedConuter);
+            if seedConuterHexa.len() < 2{
+                seedConuterHexa = "0".to_string() + &*format!("{:x}", seedConuter);
+            }else{
+                seedConuterHexa = format!("{:x}", seedConuter);
+            }
 
-        let mut hasher = Md5::new();
-        hasher.update(msg.into_bytes());
-        let result = hasher.finalize();
+            let mut seed: String = "".to_string();
+            for zero in 0 .. (16 - seedConuterHexa.len()){
+                seed = seed + "0";
+            }
 
-        println!("result = {:?}", result.to_vec());
-        let mut hashCode: String = "".to_string();
+            seed += seedConuterHexa.as_str();
+            seedConuter += 1;
+            let msg: String = seed + self.input.message.as_str();
 
-        for msd5Hash in result.to_vec() {
-            hashCode = hashCode + format!("{:x}", msd5Hash).as_str();
-            //TODO hashCode implement 0
-        }
+            let mut hasher = Md5::new();
+            hasher.update(msg.into_bytes());
+            let result = hasher.finalize();
 
-        println!("hashCode = {}", hashCode);
-        let isGood = verifyComplexity(result.to_vec(), 9) ;
-        println!("isGood = {}", isGood);
-        MD5HashCashOutput{
-            seed: 0,
-            hashcode: "".to_string(),
+            let mut hashCode: String = "".to_string();
+
+            for msd5Hash in result.to_vec() {
+                let format = format!("{:x}", msd5Hash);
+                if format.len() < 2{
+                    hashCode = hashCode + "0" + format.as_str();
+                }else{
+                    hashCode = hashCode + format.as_str();
+                }
+            }
+
+            let isGood = verifyComplexity(result.to_vec(), self.input.complexity) ;
+            if isGood {
+                return MD5HashCashOutput{
+                    seed: seedConuter,
+                    hashcode: hashCode,
+                }
+            }
         }
     }
 
