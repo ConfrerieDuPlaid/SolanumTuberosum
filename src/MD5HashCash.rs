@@ -58,13 +58,7 @@ impl ChallengeResolve for MD5HashCashResolver{
             }
             hashCode = hashCode.to_uppercase();
             let isGood = verifyComplexity(result.to_vec(), self.input.complexity) ;
-            println!("hashCode = {}", hashCode);
-            println!("msg = {}", msg);
-            println!("counter = {}", seedCounter);
-            println!("hexaCounter = {}", seedCounterHexa);
-            println!("seed = {}", seed);
-            println!("result = {:?}", result.to_vec());
-            println!("isGood = {}", isGood);
+
             if isGood {
                 return MD5HashCashOutput{
                     seed: seedCounter,

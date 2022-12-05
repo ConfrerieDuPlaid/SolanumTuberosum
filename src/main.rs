@@ -37,7 +37,7 @@ fn receive_messages(mut stream: &TcpStream){
         let mut buf = vec![0; res_size as usize];
         stream.read(&mut buf);
         let string_receive = String::from_utf8_lossy(&buf);
-        println!("string_receive = {}", string_receive);
+        //println!("string_receive = {}", string_receive);
         match serde_json::from_str(&string_receive) {
             Ok(message) => dispatch_messages(stream, message),
             Err(_) => println!("Error while parsing message"),
@@ -46,6 +46,7 @@ fn receive_messages(mut stream: &TcpStream){
 }
 
 fn dispatch_messages(mut stream: &TcpStream, message: Message) {
+
     //println!("Dispatching: {:?}", message);
     match message {
         Message::Welcome { version } => {
@@ -59,13 +60,13 @@ fn dispatch_messages(mut stream: &TcpStream, message: Message) {
             //println!("SubscribeResult")
         }
         Message::PublicLeaderBoard( publicLeaderBoard ) => {
-            //println!("{:?}", publicLeaderBoard);
+            println!("publicLeaderBoard = {:?}", publicLeaderBoard);
         },
         Message::ChallengeTimeout(message) => {
-            println!("message = {}", message);
+            //println!("message = {}", message);
         },
         Message::RoundSummary{ challenge, chain} => {
-            println!("challenge = {} chain = {:?}", challenge, chain);
+            //println!("challenge = {} chain = {:?}", challenge, chain);
         }
         Message::Challenge(challenge) => {
             let answer = match challenge {
@@ -74,7 +75,7 @@ fn dispatch_messages(mut stream: &TcpStream, message: Message) {
                     ChallengeAnswer::MD5HashCash(solver.solve())
                 }
             };
-            println!("answer = {:?}", answer);
+
             let message = Message::ChallengeResult {
                 answer,
                 next_target: "".to_string()
@@ -84,9 +85,11 @@ fn dispatch_messages(mut stream: &TcpStream, message: Message) {
         Message::EndOfGame { leader_board } => {
             println!("leader_board = {:?}", leader_board);
             stream.flush();
+            exit(0);
         }
         _ => {print!("Error")}
     }
+
 }
 
 fn send_message(mut stream: &TcpStream, message: Message) {
