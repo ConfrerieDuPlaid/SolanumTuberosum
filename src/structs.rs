@@ -78,7 +78,11 @@ pub enum Message {
     ChallengeTimeout(
         String
     ),
-    RoundSummary(String, Vec<ReportedChallengeResult>)
+    RoundSummary{
+        challenge: String,
+        chain: Vec<ReportedChallengeResult>
+    },
+    EndOfGame{leader_board: Vec<PublicPlayer>}
 }
 
 pub trait ChallengeResolve{

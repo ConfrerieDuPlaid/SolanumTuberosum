@@ -3,6 +3,7 @@ mod MD5HashCash;
 
 use std::io::{Read, Write};
 use std::net::TcpStream;
+use std::process::exit;
 use serde::{Deserialize, Serialize};
 use rand::Rng;
 use crate::structs::{Challenge, MD5HashCashInput, Message};
@@ -63,8 +64,8 @@ fn dispatch_messages(mut stream: &TcpStream, message: Message) {
         Message::ChallengeTimeout(message) => {
             println!("message = {}", message);
         },
-        Message::RoundSummary(message, test) => {
-            println!("messageRound = {} test = {:?}", message, test);
+        Message::RoundSummary{ challenge, chain} => {
+            println!("challenge = {} chain = {:?}", challenge, chain);
         }
         Message::Challenge(challenge) => {
             let answer = match challenge {
@@ -79,6 +80,10 @@ fn dispatch_messages(mut stream: &TcpStream, message: Message) {
                 next_target: "".to_string()
             };
             send_message(&stream, message);
+        }
+        Message::EndOfGame { leader_board } => {
+            println!("leader_board = {:?}", leader_board);
+            stream.flush();
         }
         _ => {print!("Error")}
     }

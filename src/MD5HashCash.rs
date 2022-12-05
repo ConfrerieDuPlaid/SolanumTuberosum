@@ -27,26 +27,23 @@ impl ChallengeResolve for MD5HashCashResolver{
     }
 
     fn solve(&self) -> Self::Output {
-        let mut seedConuter = 0;
+        let mut seedCounter = 0;
         loop {
-            let mut seedConuterHexa = format!("{:x}", seedConuter);
-            if seedConuterHexa.len() < 2{
-                seedConuterHexa = "0".to_string() + &*format!("{:x}", seedConuter);
-            }else{
-                seedConuterHexa = format!("{:x}", seedConuter);
+            let mut seedCounterHexa = format!("{:x}", seedCounter).to_uppercase();
+            if seedCounterHexa.len() < 2{
+                seedCounterHexa = "0".to_string() + seedCounterHexa.as_str();
             }
 
             let mut seed: String = "".to_string();
-            for zero in 0 .. (16 - seedConuterHexa.len()){
+            for zero in 0 .. (16 - seedCounterHexa.len()){
                 seed = seed + "0";
             }
 
-            seed += seedConuterHexa.as_str();
-            seedConuter += 1;
-            let msg: String = seed + self.input.message.as_str();
+            seed += seedCounterHexa.as_str();
+            let mut msg: String = seed.clone() + self.input.message.as_str();
 
             let mut hasher = Md5::new();
-            hasher.update(msg.into_bytes());
+            hasher.update(msg.clone().into_bytes());
             let result = hasher.finalize();
 
             let mut hashCode: String = "".to_string();
@@ -59,14 +56,22 @@ impl ChallengeResolve for MD5HashCashResolver{
                     hashCode = hashCode + format.as_str();
                 }
             }
-
+            hashCode = hashCode.to_uppercase();
             let isGood = verifyComplexity(result.to_vec(), self.input.complexity) ;
+            println!("hashCode = {}", hashCode);
+            println!("msg = {}", msg);
+            println!("counter = {}", seedCounter);
+            println!("hexaCounter = {}", seedCounterHexa);
+            println!("seed = {}", seed);
+            println!("result = {:?}", result.to_vec());
+            println!("isGood = {}", isGood);
             if isGood {
                 return MD5HashCashOutput{
-                    seed: seedConuter,
+                    seed: seedCounter,
                     hashcode: hashCode,
                 }
             }
+            seedCounter += 1;
         }
     }
 
