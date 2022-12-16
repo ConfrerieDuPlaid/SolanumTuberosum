@@ -3,9 +3,11 @@ use crate::structs::MD5HashCashOutput;
 use crate::structs::ChallengeAnswer;
 use crate::structs::ChallengeResolve;
 use crate::structs::MD5HashCashInput;
-use md5::{Md5, Digest};
+use md5::{Md5, Digest, Md5Core};
 use hex::encode;
 use md5::digest::consts::U64;
+use md5::digest::core_api::CoreWrapper;
+use md5::digest::Output;
 
 pub struct MD5HashCashResolver {
     pub input: MD5HashCashInput
@@ -28,28 +30,35 @@ impl ChallengeResolve for MD5HashCashResolver{
 
     fn solve(&self) -> Self::Output {
         let mut seedCounter = 0;
+        let mut seedCounterHexa: String;
+        let mut hashCode: String = "".to_string();
+        let mut seed: String = "".to_string();
+        let mut msg: String;
+        let mut result: Output<CoreWrapper<Md5Core>>;
+        let mut format: String;
+        let mut isValidComplexity: bool;
         loop {
-            let mut seedCounterHexa = format!("{:x}", seedCounter).to_uppercase();
+            seedCounterHexa = format!("{:x}", seedCounter).to_uppercase();
             if seedCounterHexa.len() < 2{
                 seedCounterHexa = "0".to_string() + seedCounterHexa.as_str();
             }
 
-            let mut seed: String = "".to_string();
+            seed = "".to_string();
             for zero in 0 .. (16 - seedCounterHexa.len()){
                 seed = seed + "0";
             }
 
             seed += seedCounterHexa.as_str();
-            let mut msg: String = seed.clone() + self.input.message.as_str();
+            msg = seed.clone() + self.input.message.as_str();
 
             let mut hasher = Md5::new();
             hasher.update(msg.clone().into_bytes());
-            let result = hasher.finalize();
+            result = hasher.finalize();
 
-            let mut hashCode: String = "".to_string();
+            hashCode = "".to_string();
 
             for msd5Hash in result.to_vec() {
-                let format = format!("{:x}", msd5Hash);
+                format = format!("{:x}", msd5Hash);
                 if format.len() < 2{
                     hashCode = hashCode + "0" + format.as_str();
                 }else{
@@ -57,9 +66,9 @@ impl ChallengeResolve for MD5HashCashResolver{
                 }
             }
             hashCode = hashCode.to_uppercase();
-            let isGood = verifyComplexity(result.to_vec(), self.input.complexity) ;
+            isValidComplexity = verifyComplexity(result.to_vec(), self.input.complexity) ;
 
-            if isGood {
+            if isValidComplexity {
                 return MD5HashCashOutput{
                     seed: seedCounter,
                     hashcode: hashCode,
