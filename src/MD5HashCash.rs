@@ -1,13 +1,14 @@
-use crate::structs::Challenge;
-use crate::structs::MD5HashCashOutput;
-use crate::structs::ChallengeAnswer;
-use crate::structs::ChallengeResolve;
-use crate::structs::MD5HashCashInput;
-use md5::{Md5, Digest, Md5Core};
 use hex::encode;
+use md5::{Digest, Md5, Md5Core};
 use md5::digest::consts::U64;
 use md5::digest::core_api::CoreWrapper;
 use md5::digest::Output;
+
+use crate::structs::Challenge;
+use crate::structs::ChallengeAnswer;
+use crate::structs::ChallengeResolve;
+use crate::structs::MD5HashCashInput;
+use crate::structs::MD5HashCashOutput;
 
 pub struct MD5HashCashResolver {
     pub input: MD5HashCashInput

@@ -1,16 +1,21 @@
-mod structs;
-mod MD5HashCash;
-
 use std::io::{Read, Write};
 use std::net::TcpStream;
 use std::process::exit;
-use serde::{Deserialize, Serialize};
+
 use rand::Rng;
-use crate::structs::{Challenge, MD5HashCashInput, Message};
-use crate::structs::MD5HashCashOutput;
-use crate::structs::ChallengeAnswer;
+use serde::{Deserialize, Serialize};
+
 use MD5HashCash::MD5HashCashResolver;
 use structs::ChallengeResolve;
+
+use crate::RecoverSecret::RecoverSecretResolver;
+use crate::structs::{Challenge, MD5HashCashInput, Message};
+use crate::structs::ChallengeAnswer;
+use crate::structs::MD5HashCashOutput;
+
+mod structs;
+mod MD5HashCash;
+mod RecoverSecret;
 
 fn main() {
     match TcpStream::connect("127.0.0.1:7878") {
@@ -73,6 +78,10 @@ fn dispatch_messages(mut stream: &TcpStream, message: Message) {
                 Challenge::MD5HashCash(md5) => {
                     let solver = MD5HashCashResolver::new(md5);
                     ChallengeAnswer::MD5HashCash(solver.solve())
+                },
+                Challenge::RecoverSecret(recoverSecret) => {
+                    let solver = RecoverSecretResolver::new(recoverSecret);
+                    ChallengeAnswer::RecoverSecret(solver.solve())
                 }
             };
 

@@ -25,7 +25,8 @@ pub struct PublicPlayer{
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Challenge {
-    MD5HashCash (MD5HashCashInput)
+    MD5HashCash (MD5HashCashInput),
+    RecoverSecret (RecoverSecretInput)
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -41,9 +42,22 @@ pub struct MD5HashCashOutput {
     pub hashcode: String,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct RecoverSecretInput {
+    pub word_count: usize,
+    pub letters: String,
+    pub tuple_sizes: Vec<usize>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct RecoverSecretOutput {
+    pub secret_sentence: String,
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub enum ChallengeAnswer {
-    MD5HashCash(MD5HashCashOutput)
+    MD5HashCash(MD5HashCashOutput),
+    RecoverSecret(RecoverSecretOutput)
 }
 #[derive(Serialize, Deserialize, Debug)]
 pub enum ChallengeValue{
