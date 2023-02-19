@@ -32,9 +32,7 @@ impl ChallengeResolve for RecoverSecretResolver {
             substrings.insert(i, self.input.letters[index .. index+tuple_size].to_string());
             index += tuple_size;
         }
-        println!("{}", self.input.letters);
         let word = resolve(substrings);
-        println!("Mot final {}", word);
         return RecoverSecretOutput {
             secret_sentence: word,
         };
@@ -47,8 +45,8 @@ impl ChallengeResolve for RecoverSecretResolver {
 
 fn strings_are_not_empty(strings: &Vec<String>) -> bool {
     for str in strings {
-        if str.len() != 0 {
-            true;
+        if str.len() > 0 {
+            return true;
         }
     }
     return false;
@@ -124,39 +122,20 @@ fn remove_first_letter_from_substrings(substrings: &mut Vec<String>, first_lette
             }
         }
     }
-    for i in 0..substrings.len() {
-        println!("{}", substrings[i]);
-    }
 }
-
-// fn resolve_one<'a> (first_letters: &'a mut HashMap<&'a str, usize>, substrings: &'a Vec<String>) -> &'a str {    let substrings_clone = &substrings.clone();
-//
-//     return
-// }
 
 fn resolve (substrings: &mut Vec<String>) -> String {
     let mut word: String = "".to_string();
-
-    for substr in &mut *substrings {
-        println!("{}", substr);
-    }
-
-
     while strings_are_not_empty(&substrings) == true {
-        println!("Coucou ?");
         let mut first_letters: &mut HashMap<&str, usize> = &mut HashMap::new() ;
         let substrings_clone = substrings.clone();
+
         find_fist_possible_letters(first_letters, &substrings_clone);
         unset_invalid_first_letters(&substrings_clone, first_letters);
+
         let l = find_first_valid_letter(first_letters);
-        println!("Lettre {}", l);
         word += &l.to_string();
         remove_first_letter_from_substrings(substrings, l);
-        println!();
-        for i in 0..substrings.len() {
-            println!("{}", substrings[i]);
-        }
     }
-    println!("Coucou {}", word);
     return word;
 }
