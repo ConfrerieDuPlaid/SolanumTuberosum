@@ -140,8 +140,8 @@ fn send_message(mut stream: &TcpStream, message: Message) {
         let message_size = bytes_message.len() as u32;
 
         let message_length_as_bytes = message_size.to_be_bytes();
-        stream.write(&message_length_as_bytes).unwrap();
+        stream.write(&message_length_as_bytes).expect("Unable to send message");
 
-        stream.write(bytes_message).unwrap();
+        stream.write(bytes_message).expect("Unable to send message");
     }
 }
