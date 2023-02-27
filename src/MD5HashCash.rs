@@ -67,7 +67,7 @@ impl ChallengeResolve for MD5HashCashResolver{
                 }
             }
             hashCode = hashCode.to_uppercase();
-            isValidComplexity = verifyComplexity(result.to_vec(), self.input.complexity) ;
+            isValidComplexity = verify_complexity(result.to_vec(), self.input.complexity) ;
 
             if isValidComplexity {
                 return MD5HashCashOutput{
@@ -86,15 +86,57 @@ impl ChallengeResolve for MD5HashCashResolver{
 
 }
 
-fn verifyComplexity(hashArray: Vec<u8>, complexity: u32) -> bool{
-    let indexMin: u32 = complexity / 8;
-    let valueMax: u32 = 2u32.pow(8 - ( complexity % 8 ) );
+fn verify_complexity(hash_array: Vec<u8>, complexity: u32) -> bool{
+    let index_min: u32 = complexity / 8;
+    let value_max: u32 = 2u32.pow(8 - ( complexity % 8 ) );
 
-    for i in 0..indexMin {
-        if hashArray.get(i as usize).unwrap() != &0 {
-            return false
+    for i in 0..index_min {
+        let i_value = hash_array.get(i as usize);
+        match i_value {
+            None => {}
+            Some(value) => {
+                if value != &0 {
+                    println!("returning false on {}", *value);
+                    return false;
+                }
+            }
         }
     };
 
-    hashArray.get(indexMin as usize).unwrap() < &(valueMax as u8)
+    let value_at_index_min  = hash_array.get(index_min as usize);
+    let mut res = false;
+    match value_at_index_min {
+        None => {}
+        Some(value) => {
+            res = value < &(value_max as u8);
+        }
+    }
+    return res;
+}
+
+
+#[cfg(test)]
+mod tests {
+    // Note this useful idiom: importing names from outer (for mod tests) scope.
+    use super::*;
+
+    #[test]
+    fn verify_valid_complexity() {
+        let complexity: u32 = 9;
+        let mut hash : Vec<u8> = vec![];
+        hash.push(0);
+        hash.push(127);
+        let verify = verify_complexity(hash, complexity);
+        assert_eq!(true, verify);
+    }
+
+    #[test]
+    fn verify_invalid_complexity() {
+        let complexity: u32 = 9;
+        let mut hash : Vec<u8> = vec![];
+        hash.push(0);
+        hash.push(128);
+        let verify = verify_complexity(hash, complexity);
+        assert_eq!(false, verify);
+    }
 }

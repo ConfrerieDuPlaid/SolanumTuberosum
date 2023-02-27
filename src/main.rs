@@ -36,9 +36,9 @@ pub struct Game {
 }
 
 impl Game {
-    fn create_game () -> Client{
-        const client: Client = Client{ public_leader_board: vec![] };
-        return client
+    fn create_game () -> Game{
+        const game: Game = Game{ public_leader_board: vec![] };
+        return game
     }
 
     fn receive_messages(&mut self, mut stream: &TcpStream){
