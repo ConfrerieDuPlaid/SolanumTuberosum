@@ -107,12 +107,9 @@ impl Game {
                             answer,
                             next_target: "".to_string()
                         };
-                        println!("coucou");
                         send_message(&stream, message);
                     }
                     Some(target) => {
-                        println!("Hello");
-
                         message = Message::ChallengeResult {
                             answer,
                             next_target: target.clone().name
