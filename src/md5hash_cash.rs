@@ -15,16 +15,23 @@ impl ChallengeResolve for MD5HashCashResolver{
     type Input = MD5HashCashInput;
     type Output = MD5HashCashOutput;
 
+    /// Name of the challenge
     fn name() -> String {
         "HashCash".to_string()
     }
 
+    /// Create a challenge from the specific input
     fn new(input: Self::Input) -> Self {
         MD5HashCashResolver{
             input
         }
     }
 
+    /// Solve the challenge.
+    /// It will generate a seed and compute the hash of the seed + message.
+    /// It will check if the hash has the correct complexity.
+    /// If the complexity is not correct, it will increment the seed and try again.
+    /// If the complexity is correct, it will return the seed and the hash.
     fn solve(&self) -> Self::Output {
         let mut seed_counter = 0;
         let mut seed_counter_hexa: String;
@@ -82,6 +89,12 @@ impl ChallengeResolve for MD5HashCashResolver{
 
 }
 
+/// Verify that the hash has the correct complexity.
+/// The complexity is the number of bits that must be 0.
+/// The complexity is divided by 8 to get the index of the first byte that mustn't be 0.
+/// Check if bytes until the minimum index are 0.
+/// Check if the byte at the minimum index is less than the maximum value.
+/// The complexity is valid when both conditions are true.
 fn verify_complexity(hash_array: Vec<u8>, complexity: u32) -> bool{
     let index_min: u32 = complexity / 8;
     let value_max: u32 = 2u32.pow(8 - ( complexity % 8 ) );

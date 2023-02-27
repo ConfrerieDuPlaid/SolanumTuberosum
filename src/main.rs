@@ -15,6 +15,11 @@ mod structs;
 mod md5hash_cash;
 mod recover_secret;
 
+/// Client resolving challenges.
+/// It will connect to the server and will receive challenges.
+/// It will resolve the challenges and send the answer to the server.
+
+
 fn main() {
     match TcpStream::connect("127.0.0.1:7878") {
         Ok(stream) => {
@@ -39,6 +44,9 @@ impl Game {
         return GAME
     }
 
+    /// Receive messages from the server.
+    /// It will read the buffer size and then read the buffer.
+    /// It will deserialize the buffer and dispatch the message.
     fn receive_messages(&mut self, mut stream: &TcpStream){
         loop {
             let mut buf_size = [0; 4];
@@ -58,6 +66,8 @@ impl Game {
         }
     }
 
+    /// Dispatch the message received from the server.
+    /// Match the message and call the corresponding function.
     fn dispatch_messages(&mut self, mut stream: &TcpStream, message: Message) {
         match message {
             Message::Welcome { version: _version } => {
@@ -130,7 +140,10 @@ impl Game {
 }
 
 
-
+/// Send a message to the server.
+/// It will serialize the message and send the buffer size and the buffer.
+/// The buffer size is a u32.
+/// The buffer size is sent in big endian.
 fn send_message(mut stream: &TcpStream, message: Message) {
     if let Ok(message) = serde_json::to_string(&message) {
         let bytes_message = message.as_bytes();
