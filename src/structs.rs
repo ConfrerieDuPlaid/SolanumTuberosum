@@ -1,7 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-pub type PublicLeaderBoard = Vec<PublicPlayer>;
-
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum SubscribeError {
     AlreadyRegistered,

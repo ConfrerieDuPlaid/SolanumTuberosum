@@ -3,23 +3,21 @@ use std::net::TcpStream;
 use std::process::exit;
 
 use rand::Rng;
-use serde::{Deserialize, Serialize};
 
-use MD5HashCash::MD5HashCashResolver;
+use md5hash_cash::MD5HashCashResolver;
 use structs::ChallengeResolve;
 
-use crate::RecoverSecret::RecoverSecretResolver;
-use crate::structs::{Challenge, MD5HashCashInput, Message, PublicLeaderBoard, PublicPlayer};
+use crate::recover_secret::RecoverSecretResolver;
+use crate::structs::{Challenge, Message, PublicPlayer};
 use crate::structs::ChallengeAnswer;
-use crate::structs::MD5HashCashOutput;
 
 mod structs;
-mod MD5HashCash;
-mod RecoverSecret;
+mod md5hash_cash;
+mod recover_secret;
 
 fn main() {
     match TcpStream::connect("127.0.0.1:7878") {
-        Ok(mut stream) => {
+        Ok(stream) => {
             let message = Message::Hello;
             send_message(&stream, message);
 
@@ -37,21 +35,21 @@ pub struct Game {
 
 impl Game {
     fn create_game () -> Game{
-        const game: Game = Game{ public_leader_board: vec![] };
-        return game
+        const GAME: Game = Game{ public_leader_board: vec![] };
+        return GAME
     }
 
     fn receive_messages(&mut self, mut stream: &TcpStream){
         loop {
             let mut buf_size = [0; 4];
-            stream.read(&mut buf_size);
+            stream.read(&mut buf_size).expect("Unable to read buffer");
             let res_size = u32::from_be_bytes(buf_size);
             if res_size == 0 {
                 continue
             }
 
             let mut buf = vec![0; res_size as usize];
-            stream.read(&mut buf);
+            stream.read(&mut buf).expect("Unable to read buffer");
             let string_receive = String::from_utf8_lossy(&buf);
             match serde_json::from_str(&string_receive) {
                 Ok(message) => self.dispatch_messages(stream, message),
@@ -62,18 +60,18 @@ impl Game {
 
     fn dispatch_messages(&mut self, mut stream: &TcpStream, message: Message) {
         match message {
-            Message::Welcome { version } => {
+            Message::Welcome { version: _version } => {
                 let mut rng = rand::thread_rng();
                 let n1: u8 = rng.gen();
 
                 let answer = Message::Subscribe { name: "Player".to_string() + &n1.to_string() };
                 send_message(&stream, answer);
             }
-            Message::SubscribeResult(subscribeResult) => {
+            Message::SubscribeResult(_subscribe_result) => {
                 //println!("SubscribeResult")
             }
-            Message::PublicLeaderBoard( publicLeaderBoard ) => {
-                for player in publicLeaderBoard{
+            Message::PublicLeaderBoard(public_leader_board ) => {
+                for player in public_leader_board {
                     self.public_leader_board.push(PublicPlayer{
                         name: player.name,
                         stream_id: "0".to_string(),
@@ -83,14 +81,12 @@ impl Game {
                         total_used_time: 0.0,
                     });
                 }
-                println!("publicLeaderBoard = {:?}", self.public_leader_board.get(0).unwrap().name);
-
-            },
+            }
             Message::ChallengeTimeout(message) => {
                 println!("message = {}", message);
             },
-            Message::RoundSummary{ challenge, chain} => {
-                //println!("challenge = {} chain = {:?}", challenge, chain);
+            Message::RoundSummary{ challenge: _challenge, chain: _chain } => {
+                //println!("_challenge = {} _chain = {:?}", _challenge, _chain);
             }
             Message::Challenge(challenge) => {
                 let answer = match challenge {
@@ -98,12 +94,12 @@ impl Game {
                         let solver = MD5HashCashResolver::new(md5);
                         ChallengeAnswer::MD5HashCash(solver.solve())
                     },
-                    Challenge::RecoverSecret(recoverSecret) => {
-                        let solver = RecoverSecretResolver::new(recoverSecret);
+                    Challenge::RecoverSecret(recover_secret) => {
+                        let solver = RecoverSecretResolver::new(recover_secret);
                         ChallengeAnswer::RecoverSecret(solver.solve())
                     }
                 };
-                let mut message: Message;
+                let message: Message;
                 let next_target: Option<&PublicPlayer> = self.public_leader_board.get(0);
                 match next_target {
                     None => {
@@ -127,7 +123,7 @@ impl Game {
             }
             Message::EndOfGame { leader_board } => {
                 println!("leader_board = {:?}", leader_board);
-                stream.flush();
+                stream.flush().expect("Unable to flush stream");
                 exit(0);
             }
             _ => {print!("Error")}

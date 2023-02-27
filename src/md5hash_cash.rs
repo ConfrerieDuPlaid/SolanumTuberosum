@@ -1,11 +1,7 @@
-use hex::encode;
 use md5::{Digest, Md5, Md5Core};
-use md5::digest::consts::U64;
 use md5::digest::core_api::CoreWrapper;
 use md5::digest::Output;
 
-use crate::structs::Challenge;
-use crate::structs::ChallengeAnswer;
 use crate::structs::ChallengeResolve;
 use crate::structs::MD5HashCashInput;
 use crate::structs::MD5HashCashOutput;
@@ -30,56 +26,56 @@ impl ChallengeResolve for MD5HashCashResolver{
     }
 
     fn solve(&self) -> Self::Output {
-        let mut seedCounter = 0;
-        let mut seedCounterHexa: String;
-        let mut hashCode: String = "".to_string();
-        let mut seed: String = "".to_string();
+        let mut seed_counter = 0;
+        let mut seed_counter_hexa: String;
+        let mut hash_code: String;
+        let mut seed: String;
         let mut msg: String;
         let mut result: Output<CoreWrapper<Md5Core>>;
         let mut format: String;
-        let mut isValidComplexity: bool;
+        let mut is_valid_complexity: bool;
         loop {
-            seedCounterHexa = format!("{:x}", seedCounter).to_uppercase();
-            if seedCounterHexa.len() < 2{
-                seedCounterHexa = "0".to_string() + seedCounterHexa.as_str();
+            seed_counter_hexa = format!("{:x}", seed_counter).to_uppercase();
+            if seed_counter_hexa.len() < 2{
+                seed_counter_hexa = "0".to_string() + seed_counter_hexa.as_str();
             }
 
             seed = "".to_string();
-            for zero in 0 .. (16 - seedCounterHexa.len()){
+            for _ in 0 .. (16 - seed_counter_hexa.len()){
                 seed = seed + "0";
             }
 
-            seed += seedCounterHexa.as_str();
+            seed += seed_counter_hexa.as_str();
             msg = seed.clone() + self.input.message.as_str();
 
             let mut hasher = Md5::new();
             hasher.update(msg.clone().into_bytes());
             result = hasher.finalize();
 
-            hashCode = "".to_string();
+            hash_code = "".to_string();
 
-            for msd5Hash in result.to_vec() {
-                format = format!("{:x}", msd5Hash);
+            for msd5_hash in result.to_vec() {
+                format = format!("{:x}", msd5_hash);
                 if format.len() < 2{
-                    hashCode = hashCode + "0" + format.as_str();
+                    hash_code = hash_code + "0" + format.as_str();
                 }else{
-                    hashCode = hashCode + format.as_str();
+                    hash_code = hash_code + format.as_str();
                 }
             }
-            hashCode = hashCode.to_uppercase();
-            isValidComplexity = verify_complexity(result.to_vec(), self.input.complexity) ;
+            hash_code = hash_code.to_uppercase();
+            is_valid_complexity = verify_complexity(result.to_vec(), self.input.complexity) ;
 
-            if isValidComplexity {
+            if is_valid_complexity {
                 return MD5HashCashOutput{
-                    seed: seedCounter,
-                    hashcode: hashCode,
+                    seed: seed_counter,
+                    hashcode: hash_code,
                 }
             }
-            seedCounter += 1;
+            seed_counter += 1;
         }
     }
 
-    fn verify(&self, answer: &Self::Output) -> bool {
+    fn verify(&self, _answer: &Self::Output) -> bool {
         todo!()
     }
 
