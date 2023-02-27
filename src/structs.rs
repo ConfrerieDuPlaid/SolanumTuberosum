@@ -15,12 +15,12 @@ pub enum SubscribeResult {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PublicPlayer{
-    name: String,
-    stream_id: String,
-    score: i32,
-    steps: u32,
-    is_active: bool,
-    total_used_time: f64
+    pub name: String,
+    pub(crate) stream_id: String,
+    pub(crate) score: i32,
+    pub(crate) steps: u32,
+    pub(crate) is_active: bool,
+    pub(crate) total_used_time: f64
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
